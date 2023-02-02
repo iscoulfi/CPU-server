@@ -10,7 +10,13 @@ export const register = async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ errors: errors.array() });
+      let message = '';
+      ['username', 'email', 'password'].forEach((el) => {
+        if (errors.mapped()[el]) {
+          message += errors.mapped()[el].msg + ' ';
+        }
+      });
+      return res.json({ message });
     }
     const { username, email, password } = req.body;
 

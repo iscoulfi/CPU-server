@@ -9,9 +9,9 @@ const router = Router();
 // http://localhost:5001/api/auth/register
 router.post(
   '/register',
-  body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
-  body('email').isEmail().withMessage('E-mail must contain a valid email adress'),
-  body('password').isLength({ min: 5 }).withMessage('Password must be at least 5 characters long'),
+  body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters long.'),
+  body('email').isEmail().withMessage('E-mail must contain a valid email adress.'),
+  body('password').isLength({ min: 5 }).withMessage('Password must be at least 5 characters long.'),
   register,
 );
 
