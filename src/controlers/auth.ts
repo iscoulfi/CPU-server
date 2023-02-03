@@ -1,23 +1,12 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { validationResult } from 'express-validator';
 import User from '../models/User.js';
 import Role from '../models/Role.js';
 
 // Register user
 export const register = async (req: Request, res: Response) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      let message = '';
-      ['username', 'email', 'password'].forEach((el) => {
-        if (errors.mapped()[el]) {
-          message += errors.mapped()[el].msg + ' ';
-        }
-      });
-      return res.json({ message });
-    }
     const { username, email, password } = req.body;
 
     const nameIsUsed = await User.findOne({ username });
