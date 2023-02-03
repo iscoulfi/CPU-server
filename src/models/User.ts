@@ -17,6 +17,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
     },
     roles: [{ type: String, ref: 'Role' }],
+    collections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Collection' }],
   },
   { timestamps: true },
 );
