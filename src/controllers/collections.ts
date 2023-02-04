@@ -5,13 +5,10 @@ import User from '../models/User.js';
 // Create Collection
 export const createCollection = async (req: Request, res: Response) => {
   try {
-    const { title, text, topic, imgUrl } = req.body;
+    const data = req.body;
 
     const newCollection = new Collection({
-      title,
-      text,
-      topic,
-      imgUrl,
+      ...data,
       author: req.user.id,
     });
 
@@ -55,6 +52,9 @@ export const getById = async (req: Request, res: Response) => {
 //Get my collections
 export const getMyCollections = async (req: Request, res: Response) => {
   try {
+    // чекнуть как это будет работать с админом
+    // const list = await Collection.find({ author: req.user.id });
+    // res.json(list);
     const user = await User.findById(req.user.id);
     if (user) {
       const list = await Promise.all(
@@ -72,7 +72,7 @@ export const getMyCollections = async (req: Request, res: Response) => {
 // Update Collection
 export const updateCollection = async (req: Request, res: Response) => {
   try {
-    const { title, text, topic, imgUrl, id } = req.body;
+    const { title, text, topic, imgUrl } = req.body;
     const collection = await Collection.findById(req.params.id);
     if (collection) {
       collection.title = title;
