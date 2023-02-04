@@ -2,21 +2,9 @@ import { Router } from 'express';
 import { getAll, getById, getMyCollections, removeCollection } from '../controllers/collections.js';
 import { checkAuth } from '../utils/checkAuth.js';
 const router = Router();
-
-// Get All Collections
-// http://localhost:5001/api/collections
 router.get('/', getAll);
-
-// Get Collection By Id
-// http://localhost:5001/api/collections/:id
 router.get('/:id', getById);
-
-// Get My Collections
-// http://localhost:5001/api/collections/user/me
 router.get('/user/me', checkAuth, getMyCollections);
-
-// Remove Collection
-// http://localhost:5001/api/collections/:id
 router.delete('/:id', checkAuth, removeCollection);
-
 export default router;
+//# sourceMappingURL=collections.js.map
