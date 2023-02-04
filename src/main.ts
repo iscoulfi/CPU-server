@@ -2,15 +2,11 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import multer from 'multer';
-import { Storage } from '@google-cloud/storage';
 
 import authRoute from './routes/auth.js';
 import collectRoute from './routes/collections.js';
 import itemRoute from './routes/items.js';
 import commentRoute from './routes/comments.js';
-import { createCollection, updateCollection } from './controllers/collections.js';
-import { checkAuth } from './utils/checkAuth.js';
 
 const app = express();
 dotenv.config();
@@ -21,26 +17,6 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
-
-//Image Storage
-const storage = multer.diskStorage({
-  destination: function (_, __, cb) {
-    cb(null, 'uploads');
-  },
-  filename: function (_, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-const upload = multer({ storage });
-
-//Routes with images
-
-// http://localhost:5001/api/collections
-app.post('/api/collections', checkAuth, upload.single('image'), createCollection);
-
-// http://localhost:5001/api/collections/:id
-app.put('/api/collections/:id', checkAuth, upload.single('image'), updateCollection);
 
 //Routes
 app.use('/api/auth', authRoute);

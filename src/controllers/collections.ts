@@ -6,18 +6,6 @@ import User from '../models/User.js';
 export const createCollection = async (req: Request, res: Response) => {
   try {
     const data = req.body;
-    if (req.file) {
-      const newCollection = new Collection({
-        ...data,
-        imgUrl: req.file.originalname,
-        author: req.user.id,
-      });
-      await newCollection.save();
-      await User.findByIdAndUpdate(req.user.id, {
-        $push: { collections: newCollection },
-      });
-      return res.json(newCollection);
-    }
 
     const newCollection = new Collection({
       ...data,
@@ -81,19 +69,13 @@ export const getMyCollections = async (req: Request, res: Response) => {
 // Update Collection
 export const updateCollection = async (req: Request, res: Response) => {
   try {
-    const { title, text, topic } = req.body;
+    const { title, text, topic, imgUrl } = req.body;
     const collection = await Collection.findById(req.params.id);
-    if (collection && req.file) {
+    if (collection) {
       collection.title = title;
       collection.text = text;
       collection.topic = topic;
-      collection.imgUrl = req.file.originalname;
-      await collection.save();
-    } else if (collection) {
-      collection.title = title;
-      collection.text = text;
-      collection.topic = topic;
-      collection.imgUrl = '';
+      collection.imgUrl = imgUrl;
       await collection.save();
     }
     res.json(collection);
