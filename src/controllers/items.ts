@@ -132,3 +132,23 @@ export const getItemComments = async (req: Request, res: Response) => {
     res.json({ message: 'Something went wrong' });
   }
 };
+
+//Like
+export const likePost = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const item = await Item.findById(id);
+    if (item) {
+      const isLiked = item.likes.get(req.user.id);
+      if (isLiked) {
+        item.likes.delete(req.user.id);
+      } else {
+        item.likes.set(req.user.id, true);
+      }
+      const updatedItem = await Item.findByIdAndUpdate(id, { likes: item.likes }, { new: true });
+      res.json(updatedItem);
+    }
+  } catch (error) {
+    res.json({ message: 'Something went wrong' });
+  }
+};

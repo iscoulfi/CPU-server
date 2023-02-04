@@ -5,7 +5,7 @@ const ItemSchema = new mongoose.Schema(
     title: { type: String, required: true },
     tags: { type: Array, required: true },
     coll: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection', required: true },
-    likes: { type: Map, of: Boolean },
+    likes: { type: Map, of: Boolean, default: {} },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
     num1: { type: String },
     num2: { type: String },
