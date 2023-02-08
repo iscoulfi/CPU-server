@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import Collection from '../models/Collection.js';
 import User from '../models/User.js';
 
-// Create Collection
+// Create Collection +
 export const createCollection = async (req: Request, res: Response) => {
   try {
     const data = req.body;
@@ -46,7 +46,7 @@ export const getById = async (req: Request, res: Response) => {
   }
 };
 
-//Get my collections
+//Get my collections +
 export const getMyCollections = async (req: Request, res: Response) => {
   try {
     // чекнуть как это будет работать с админом
@@ -66,16 +66,16 @@ export const getMyCollections = async (req: Request, res: Response) => {
   }
 };
 
-// Update Collection
+// Update Collection +
 export const updateCollection = async (req: Request, res: Response) => {
   try {
-    const { title, text, topic, imgUrl } = req.body;
+    const { title, text, imgUrl } = req.body;
     const collection = await Collection.findById(req.params.id);
     if (collection) {
       collection.title = title;
       collection.text = text;
-      collection.topic = topic;
       collection.imgUrl = imgUrl;
+
       await collection.save();
     }
     res.json(collection);
@@ -84,7 +84,7 @@ export const updateCollection = async (req: Request, res: Response) => {
   }
 };
 
-// Remove Collection
+// Remove Collection +
 export const removeCollection = async (req: Request, res: Response) => {
   try {
     const collection = await Collection.findByIdAndDelete(req.params.id);

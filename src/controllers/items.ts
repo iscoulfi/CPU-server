@@ -67,9 +67,9 @@ export const updateItem = async (req: Request, res: Response) => {
     if (item) {
       item.title = data.title;
       item.tags = data.tags;
-      item.num1 = data.num1;
-      item.num2 = data.num2;
-      item.num3 = data.num3;
+      item.number1 = data.number1;
+      item.number2 = data.number2;
+      item.number3 = data.number3;
       item.string1 = data.string1;
       item.string2 = data.string2;
       item.string3 = data.string3;

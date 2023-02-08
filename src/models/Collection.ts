@@ -6,17 +6,21 @@ const CollectionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    text: {
+    topic: {
       type: String,
       required: true,
     },
-    topic: {
+    text: {
       type: String,
       required: true,
     },
     imgUrl: {
       type: String,
       default: '',
+    },
+    adFields: {
+      type: Array,
+      default: [],
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
