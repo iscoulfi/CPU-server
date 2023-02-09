@@ -3,18 +3,19 @@ import Item from '../models/Item.js';
 import Comment from '../models/Comment.js';
 import Collection from '../models/Collection.js';
 
-// Create Item
+// Create Item +
 export const createItem = async (req: Request, res: Response) => {
   const data = req.body;
   try {
     const newItem = new Item({
       ...data,
-      coll: req.params.colid,
+      tags: req.body.tags.split(' '),
+      coll: req.params.collId,
     });
 
     await newItem.save();
 
-    await Collection.findByIdAndUpdate(req.params.colid, {
+    await Collection.findByIdAndUpdate(req.params.collId, {
       $push: { items: newItem },
     });
 
@@ -39,20 +40,20 @@ export const getAll = async (req: Request, res: Response) => {
   }
 };
 
-// Get Item By Id
+// Get Item By Id +
 export const getById = async (req: Request, res: Response) => {
   try {
-    const item = await Item.findById(req.params.id);
+    const item = await Item.findById(req.params.itemId);
     res.json(item);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
   }
 };
 
-//Get collection Items
+//Get collection Items +
 export const getCollectionItems = async (req: Request, res: Response) => {
   try {
-    const list = await Item.find({ coll: req.params.colid });
+    const list = await Item.find({ coll: req.params.collId });
     res.json(list);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
@@ -63,7 +64,7 @@ export const getCollectionItems = async (req: Request, res: Response) => {
 export const updateItem = async (req: Request, res: Response) => {
   try {
     const data = req.body;
-    const item = await Item.findById(req.params.id);
+    const item = await Item.findById(req.params.itemId);
     if (item) {
       item.title = data.title;
       item.tags = data.tags;
@@ -91,14 +92,14 @@ export const updateItem = async (req: Request, res: Response) => {
   }
 };
 
-// Remove Item
+// Remove Item +
 export const removeItem = async (req: Request, res: Response) => {
   try {
-    const item = await Item.findByIdAndDelete(req.params.id);
+    const item = await Item.findByIdAndDelete(req.params.itemId);
     if (!item) return res.json({ message: "This Item doesn't exist" });
 
-    await Collection.findByIdAndUpdate(req.params.colid, {
-      $pull: { items: req.params.id },
+    await Collection.findByIdAndUpdate(req.params.collId, {
+      $pull: { items: req.params.itemId },
     });
 
     res.json({ message: 'Item has been deleted' });
@@ -126,7 +127,7 @@ export const getLastTags = async (req: Request, res: Response) => {
 // Get Item Comments
 export const getItemComments = async (req: Request, res: Response) => {
   try {
-    const list = await Comment.find({ item: req.params.id });
+    const list = await Comment.find({ item: req.params.itemId });
     res.json(list);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
@@ -136,16 +137,16 @@ export const getItemComments = async (req: Request, res: Response) => {
 //Like
 export const likePost = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const item = await Item.findById(id);
+    const { itemId } = req.params;
+    const item = await Item.findById(itemId);
     if (item) {
-      const isLiked = item.likes.get(req.user.id);
+      const isLiked = item.likes.get(req.user.itemId);
       if (isLiked) {
-        item.likes.delete(req.user.id);
+        item.likes.delete(req.user.itemId);
       } else {
-        item.likes.set(req.user.id, true);
+        item.likes.set(req.user.itemId, true);
       }
-      const updatedItem = await Item.findByIdAndUpdate(id, { likes: item.likes }, { new: true });
+      const updatedItem = await Item.findByIdAndUpdate(itemId, { likes: item.likes }, { new: true });
       res.json(updatedItem);
     }
   } catch (error) {
