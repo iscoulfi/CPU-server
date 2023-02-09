@@ -36,7 +36,7 @@ export const getAll = async (req: Request, res: Response) => {
   }
 };
 
-// Get Collection By Id
+// Get Collection By Id +
 export const getById = async (req: Request, res: Response) => {
   try {
     const collection = await Collection.findById(req.params.id);
@@ -69,12 +69,13 @@ export const getMyCollections = async (req: Request, res: Response) => {
 // Update Collection +
 export const updateCollection = async (req: Request, res: Response) => {
   try {
-    const { title, text, imgUrl } = req.body;
+    const { title, text, imgUrl, adFields } = req.body;
     const collection = await Collection.findById(req.params.id);
     if (collection) {
       collection.title = title;
       collection.text = text;
       collection.imgUrl = imgUrl;
+      collection.adFields = adFields;
 
       await collection.save();
     }
