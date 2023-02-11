@@ -127,7 +127,7 @@ export const getLastTags = async (req: Request, res: Response) => {
   }
 };
 
-// Get Item Comments
+// Get Item Comments +
 export const getItemComments = async (req: Request, res: Response) => {
   try {
     const list = await Comment.find({ item: req.params.itemId });
@@ -137,17 +137,17 @@ export const getItemComments = async (req: Request, res: Response) => {
   }
 };
 
-//Like
+//Like +
 export const likePost = async (req: Request, res: Response) => {
   try {
     const { itemId } = req.params;
     const item = await Item.findById(itemId);
     if (item) {
-      const isLiked = item.likes.get(req.user.itemId);
+      const isLiked = item.likes.get(req.user.id);
       if (isLiked) {
-        item.likes.delete(req.user.itemId);
+        item.likes.delete(req.user.id);
       } else {
-        item.likes.set(req.user.itemId, true);
+        item.likes.set(req.user.id, true);
       }
       const updatedItem = await Item.findByIdAndUpdate(itemId, { likes: item.likes }, { new: true });
       res.json(updatedItem);
