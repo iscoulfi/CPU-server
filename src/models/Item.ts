@@ -19,9 +19,9 @@ const ItemSchema = new mongoose.Schema(
     date1: { type: String },
     date2: { type: String },
     date3: { type: String },
-    checkbox1: { type: Boolean },
-    checkbox2: { type: Boolean },
-    checkbox3: { type: Boolean },
+    checkbox1: { type: String },
+    checkbox2: { type: String },
+    checkbox3: { type: String },
   },
   { timestamps: true },
 );

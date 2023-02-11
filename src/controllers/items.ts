@@ -6,6 +6,9 @@ import Collection from '../models/Collection.js';
 // Create Item +
 export const createItem = async (req: Request, res: Response) => {
   const data = req.body;
+  data.checkbox1 = data.checkbox1 ? '+' : '-';
+  data.checkbox2 = data.checkbox2 ? '+' : '-';
+  data.checkbox3 = data.checkbox3 ? '+' : '-';
   try {
     const newItem = new Item({
       ...data,
@@ -60,14 +63,14 @@ export const getCollectionItems = async (req: Request, res: Response) => {
   }
 };
 
-// Update Item
+// Update Item +
 export const updateItem = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const item = await Item.findById(req.params.itemId);
     if (item) {
       item.title = data.title;
-      item.tags = data.tags;
+      item.tags = data.tags.split(' ');
       item.number1 = data.number1;
       item.number2 = data.number2;
       item.number3 = data.number3;
