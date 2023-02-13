@@ -35,7 +35,7 @@ export interface IItem {
   createdAt: string;
 }
 
-// Get All Items
+// Get All Items +
 export const getAll = async (req: Request, res: Response) => {
   try {
     const { search } = req.query;
@@ -50,7 +50,6 @@ export const getAll = async (req: Request, res: Response) => {
       }),
     );
 
-    // let collItems = new Array();
     let items;
     let coll;
     let comments;
@@ -123,7 +122,7 @@ export const getAll = async (req: Request, res: Response) => {
         if (a) items.push(a);
       }
     } else {
-      items = await Item.find().sort('-createdAt');
+      items = await Item.find().sort('-createdAt').limit(7);
     }
 
     items = items.reduce((i, el) => {
@@ -207,17 +206,15 @@ export const removeItem = async (req: Request, res: Response) => {
   }
 };
 
-// Get Last Tags
+// Get Last Tags +
 export const getLastTags = async (req: Request, res: Response) => {
   try {
-    const items = await Item.find().limit(5).exec();
+    const items = await Item.find().limit(15);
 
-    const tags = items
-      .map((obj) => obj.tags)
-      .flat()
-      .slice(0, 5);
+    const tags = items.map((obj) => obj.tags).flat();
+    const filterTags = tags.filter((el, ind) => ind === tags.indexOf(el)).slice(0, 15);
 
-    res.json(tags);
+    res.json(filterTags);
   } catch (err) {
     res.json({ message: 'Something went wrong' });
   }

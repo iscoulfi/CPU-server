@@ -21,10 +21,24 @@ export const createCollection = async (req: Request, res: Response) => {
   }
 };
 
-// Get All Collections
+// Get All Collections +
 export const getAll = async (req: Request, res: Response) => {
   try {
-    const collections = await Collection.find().sort('-createdAt');
+    const collections = await Collection.aggregate([
+      {
+        $addFields: {
+          itemsLength: {
+            $size: '$items',
+          },
+        },
+      },
+      {
+        $sort: {
+          itemsLength: -1,
+        },
+      },
+      { $limit: 4 },
+    ]);
 
     if (!collections) {
       return res.json({ message: 'No collections' });

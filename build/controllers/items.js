@@ -105,7 +105,7 @@ export const getAll = async (req, res) => {
             }
         }
         else {
-            items = await Item.find().sort('-createdAt');
+            items = await Item.find().sort('-createdAt').limit(7);
         }
         items = items.reduce((i, el) => {
             if (!i.find((v) => v._id.toString() == el._id.toString())) {
@@ -183,12 +183,10 @@ export const removeItem = async (req, res) => {
 };
 export const getLastTags = async (req, res) => {
     try {
-        const items = await Item.find().limit(5).exec();
-        const tags = items
-            .map((obj) => obj.tags)
-            .flat()
-            .slice(0, 5);
-        res.json(tags);
+        const items = await Item.find().limit(15);
+        const tags = items.map((obj) => obj.tags).flat();
+        const filterTags = tags.filter((el, ind) => ind === tags.indexOf(el)).slice(0, 15);
+        res.json(filterTags);
     }
     catch (err) {
         res.json({ message: 'Something went wrong' });
