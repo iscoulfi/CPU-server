@@ -54,13 +54,13 @@ export const getMyCollections = async (req, res) => {
 };
 export const updateCollection = async (req, res) => {
     try {
-        const { title, text, topic, imgUrl } = req.body;
+        const { title, text, imgUrl, adFields } = req.body;
         const collection = await Collection.findById(req.params.id);
         if (collection) {
             collection.title = title;
             collection.text = text;
-            collection.topic = topic;
             collection.imgUrl = imgUrl;
+            collection.adFields = adFields;
             await collection.save();
         }
         res.json(collection);

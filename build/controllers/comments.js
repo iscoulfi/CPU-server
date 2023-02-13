@@ -2,13 +2,13 @@ import Comment from '../models/Comment.js';
 import Item from '../models/Item.js';
 export const createComment = async (req, res) => {
     try {
-        const { comment } = req.body;
+        const { comment, author } = req.body;
         if (!comment)
             return;
-        const newComment = new Comment({ comment, author: req.user.id, item: req.params.id });
+        const newComment = new Comment({ comment, authorId: req.user.id, author, item: req.params.itemId });
         await newComment.save();
         try {
-            await Item.findByIdAndUpdate(req.params.id, {
+            await Item.findByIdAndUpdate(req.params.itemId, {
                 $push: { comments: newComment._id },
             });
         }

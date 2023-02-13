@@ -28,14 +28,110 @@ export const createItem = async (req: Request, res: Response) => {
   }
 };
 
+export interface IItem {
+  _id: string;
+  title: string;
+  coll: string;
+  createdAt: string;
+}
+
 // Get All Items
 export const getAll = async (req: Request, res: Response) => {
   try {
-    const items = await Item.find().sort('-createdAt');
+    const { search } = req.query;
 
-    if (!items) {
-      return res.json({ message: 'No items' });
+    let autoSearch = new Array();
+    ['title', 'tags', 'string1', 'string2', 'string3', 'text1', 'text2', 'text3'].forEach((el) =>
+      autoSearch.push({
+        autocomplete: {
+          query: search,
+          path: el,
+        },
+      }),
+    );
+
+    // let collItems = new Array();
+    let items;
+    let coll;
+    let comments;
+    if (search) {
+      items = await Item.aggregate([
+        {
+          $search: {
+            index: 'autocomplete',
+            compound: {
+              should: autoSearch,
+            },
+          },
+        },
+      ]);
+      coll = await Collection.aggregate([
+        {
+          $search: {
+            index: 'collections',
+            compound: {
+              should: [
+                {
+                  autocomplete: {
+                    query: search,
+                    path: 'title',
+                  },
+                },
+                {
+                  autocomplete: {
+                    query: search,
+                    path: 'text',
+                  },
+                },
+              ],
+            },
+          },
+        },
+        {
+          $project: { items: 1 },
+        },
+      ]);
+      for (const c of coll) {
+        for (const i of c.items) {
+          const a = await Item.findById(i.toString());
+          items.push(a);
+        }
+      }
+      comments = await Comment.aggregate([
+        {
+          $search: {
+            index: 'comments',
+            compound: {
+              should: [
+                {
+                  autocomplete: {
+                    query: search,
+                    path: 'comment',
+                  },
+                },
+              ],
+            },
+          },
+        },
+        {
+          $project: { item: 1 },
+        },
+      ]);
+
+      for (const c of comments) {
+        const a = await Item.findById(c.item.toString());
+        if (a) items.push(a);
+      }
+    } else {
+      items = await Item.find().sort('-createdAt');
     }
+
+    items = items.reduce((i, el) => {
+      if (!i.find((v: IItem) => v._id.toString() == el._id.toString())) {
+        i.push(el);
+      }
+      return i;
+    }, []);
 
     res.json(items);
   } catch (error) {
@@ -130,7 +226,7 @@ export const getLastTags = async (req: Request, res: Response) => {
 // Get Item Comments +
 export const getItemComments = async (req: Request, res: Response) => {
   try {
-    const list = await Comment.find({ item: req.params.itemId });
+    const list = await Comment.find({ item: req.params.itemId }).sort('-createdAt');
     res.json(list);
   } catch (error) {
     res.json({ message: 'Something went wrong' });

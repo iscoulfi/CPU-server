@@ -3,13 +3,17 @@ import Comment from '../models/Comment.js';
 import Collection from '../models/Collection.js';
 export const createItem = async (req, res) => {
     const data = req.body;
+    data.checkbox1 = data.checkbox1 ? '+' : '-';
+    data.checkbox2 = data.checkbox2 ? '+' : '-';
+    data.checkbox3 = data.checkbox3 ? '+' : '-';
     try {
         const newItem = new Item({
             ...data,
-            coll: req.params.colid,
+            tags: req.body.tags.split(' '),
+            coll: req.params.collId,
         });
         await newItem.save();
-        await Collection.findByIdAndUpdate(req.params.colid, {
+        await Collection.findByIdAndUpdate(req.params.collId, {
             $push: { items: newItem },
         });
         return res.json(newItem);
@@ -20,10 +24,95 @@ export const createItem = async (req, res) => {
 };
 export const getAll = async (req, res) => {
     try {
-        const items = await Item.find().sort('-createdAt');
-        if (!items) {
-            return res.json({ message: 'No items' });
+        const { search } = req.query;
+        let autoSearch = new Array();
+        ['title', 'tags', 'string1', 'string2', 'string3', 'text1', 'text2', 'text3'].forEach((el) => autoSearch.push({
+            autocomplete: {
+                query: search,
+                path: el,
+            },
+        }));
+        let items;
+        let coll;
+        let comments;
+        if (search) {
+            items = await Item.aggregate([
+                {
+                    $search: {
+                        index: 'autocomplete',
+                        compound: {
+                            should: autoSearch,
+                        },
+                    },
+                },
+            ]);
+            coll = await Collection.aggregate([
+                {
+                    $search: {
+                        index: 'collections',
+                        compound: {
+                            should: [
+                                {
+                                    autocomplete: {
+                                        query: search,
+                                        path: 'title',
+                                    },
+                                },
+                                {
+                                    autocomplete: {
+                                        query: search,
+                                        path: 'text',
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+                {
+                    $project: { items: 1 },
+                },
+            ]);
+            for (const c of coll) {
+                for (const i of c.items) {
+                    const a = await Item.findById(i.toString());
+                    items.push(a);
+                }
+            }
+            comments = await Comment.aggregate([
+                {
+                    $search: {
+                        index: 'comments',
+                        compound: {
+                            should: [
+                                {
+                                    autocomplete: {
+                                        query: search,
+                                        path: 'comment',
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                },
+                {
+                    $project: { item: 1 },
+                },
+            ]);
+            for (const c of comments) {
+                const a = await Item.findById(c.item.toString());
+                if (a)
+                    items.push(a);
+            }
         }
+        else {
+            items = await Item.find().sort('-createdAt');
+        }
+        items = items.reduce((i, el) => {
+            if (!i.find((v) => v._id.toString() == el._id.toString())) {
+                i.push(el);
+            }
+            return i;
+        }, []);
         res.json(items);
     }
     catch (error) {
@@ -32,7 +121,7 @@ export const getAll = async (req, res) => {
 };
 export const getById = async (req, res) => {
     try {
-        const item = await Item.findById(req.params.id);
+        const item = await Item.findById(req.params.itemId);
         res.json(item);
     }
     catch (error) {
@@ -41,7 +130,7 @@ export const getById = async (req, res) => {
 };
 export const getCollectionItems = async (req, res) => {
     try {
-        const list = await Item.find({ coll: req.params.colid });
+        const list = await Item.find({ coll: req.params.collId });
         res.json(list);
     }
     catch (error) {
@@ -51,13 +140,13 @@ export const getCollectionItems = async (req, res) => {
 export const updateItem = async (req, res) => {
     try {
         const data = req.body;
-        const item = await Item.findById(req.params.id);
+        const item = await Item.findById(req.params.itemId);
         if (item) {
             item.title = data.title;
-            item.tags = data.tags;
-            item.num1 = data.num1;
-            item.num2 = data.num2;
-            item.num3 = data.num3;
+            item.tags = data.tags.split(' ');
+            item.number1 = data.number1;
+            item.number2 = data.number2;
+            item.number3 = data.number3;
             item.string1 = data.string1;
             item.string2 = data.string2;
             item.string3 = data.string3;
@@ -80,11 +169,11 @@ export const updateItem = async (req, res) => {
 };
 export const removeItem = async (req, res) => {
     try {
-        const item = await Item.findByIdAndDelete(req.params.id);
+        const item = await Item.findByIdAndDelete(req.params.itemId);
         if (!item)
             return res.json({ message: "This Item doesn't exist" });
-        await Collection.findByIdAndUpdate(req.params.colid, {
-            $pull: { items: req.params.id },
+        await Collection.findByIdAndUpdate(req.params.collId, {
+            $pull: { items: req.params.itemId },
         });
         res.json({ message: 'Item has been deleted' });
     }
@@ -107,7 +196,7 @@ export const getLastTags = async (req, res) => {
 };
 export const getItemComments = async (req, res) => {
     try {
-        const list = await Comment.find({ item: req.params.id });
+        const list = await Comment.find({ item: req.params.itemId }).sort('-createdAt');
         res.json(list);
     }
     catch (error) {
@@ -116,8 +205,8 @@ export const getItemComments = async (req, res) => {
 };
 export const likePost = async (req, res) => {
     try {
-        const { id } = req.params;
-        const item = await Item.findById(id);
+        const { itemId } = req.params;
+        const item = await Item.findById(itemId);
         if (item) {
             const isLiked = item.likes.get(req.user.id);
             if (isLiked) {
@@ -126,7 +215,7 @@ export const likePost = async (req, res) => {
             else {
                 item.likes.set(req.user.id, true);
             }
-            const updatedItem = await Item.findByIdAndUpdate(id, { likes: item.likes }, { new: true });
+            const updatedItem = await Item.findByIdAndUpdate(itemId, { likes: item.likes }, { new: true });
             res.json(updatedItem);
         }
     }
