@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, getMe } from '../controllers/auth.js';
+import { register, login, getMe, getAll, removeUser, updateUser } from '../controllers/auth.js';
 import { checkAuth } from '../utils/checkAuth.js';
 import { checkRole } from '../utils/checkRole.js';
 const router = Router();
@@ -15,6 +15,18 @@ router.post('/login', login);
 // Get Profile
 // http://localhost:5001/api/auth/me
 router.get('/me', checkAuth, getMe);
+
+// Get All
+// http://localhost:5001/api/auth/all
+router.get('/all', getAll);
+
+// Remove User
+// http://localhost:5001/api/auth/:id
+router.delete('/:id', removeUser);
+
+// Update User
+// http://localhost:5001/api/auth/:username
+router.put('/:username', updateUser);
 
 export default router;
 

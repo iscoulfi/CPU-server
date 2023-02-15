@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import Role from '../models/Role.js';
+import Collection from '../models/Collection.js';
+import { Types } from 'mongoose';
+import Item from '../models/Item.js';
 
 // Register user
 export const register = async (req: Request, res: Response) => {
@@ -124,5 +127,59 @@ export const getMe = async (req: Request, res: Response) => {
     });
   } catch (error) {
     res.json({ message: 'No access' });
+  }
+};
+
+// Get All
+export const getAll = async (req: Request, res: Response) => {
+  try {
+    const users = await User.find({});
+
+    res.json({
+      users,
+    });
+  } catch (error) {
+    res.json('No access');
+  }
+};
+
+// Remove user
+
+export const removeUser = async (req: Request, res: Response) => {
+  try {
+    const collections = new Array();
+    const itemsId = new Array();
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (user) {
+      const collectionsId = user.collections.map((el) => el.toString());
+      for (let collId of collectionsId) {
+        collections.push(await Collection.findById(collId));
+        await Collection.findByIdAndDelete(collId);
+      }
+    }
+
+    collections.forEach((coll) => coll.items.forEach((item: Types.ObjectId) => itemsId.push(item.toString())));
+
+    for (let id of itemsId) {
+      await Item.findByIdAndDelete(id);
+    }
+
+    res.json({ id: req.params.id });
+  } catch (error) {
+    res.json({ message: 'Something went wrong' });
+  }
+};
+
+// Update user
+export const updateUser = (req: Request, res: Response) => {
+  try {
+    User.findOneAndUpdate({ username: req.params.username }, req.body).then(function () {
+      User.findOne({ username: req.params.username }).then(function (user) {
+        res.json(user);
+      });
+    });
+  } catch (error) {
+    res.json({ message: 'Something went wrong' });
   }
 };
