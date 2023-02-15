@@ -76,6 +76,12 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
+    if (user.statusUser === 'blocked') {
+      return res.json({
+        message: 'You are blocked!',
+      });
+    }
+
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
@@ -172,13 +178,11 @@ export const removeUser = async (req: Request, res: Response) => {
 };
 
 // Update user
-export const updateUser = (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response) => {
   try {
-    User.findOneAndUpdate({ username: req.params.username }, req.body).then(function () {
-      User.findOne({ username: req.params.username }).then(function (user) {
-        res.json(user);
-      });
-    });
+    await User.findByIdAndUpdate(req.params.userId, req.body);
+    const users = await User.find();
+    res.json(users);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
   }

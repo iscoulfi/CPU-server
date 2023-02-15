@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import { Server } from 'socket.io';
 
 import authRoute from './routes/auth.js';
 import collectRoute from './routes/collections.js';
@@ -28,9 +29,32 @@ const startApp = async () => {
   try {
     mongoose.set('strictQuery', false);
     await mongoose.connect(DB_URL as string);
-    app.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
   } catch (error) {
     console.log(error);
   }
 };
 startApp();
+
+const server = app.listen(PORT, () => console.log(`Server started on port: ${PORT}`));
+
+const io = new Server(server, {
+  cors: {
+    origin: process.env.SERV_ORIGIN,
+    credentials: true,
+  },
+});
+
+global.onlineUsers = new Map();
+io.on('connection', (socket) => {
+  socket.on('add-user', (userId) => {
+    onlineUsers.set(userId, socket.id);
+  });
+
+  socket.on('logout-user', (userId) => {
+    const sendUserSocket = onlineUsers.get(userId);
+
+    if (sendUserSocket) {
+      socket.to(sendUserSocket).emit('logout');
+    }
+  });
+});

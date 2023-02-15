@@ -7,3 +7,7 @@ declare global {
     }
   }
 }
+
+declare global {
+  var onlineUsers: any;
+}

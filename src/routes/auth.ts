@@ -25,8 +25,8 @@ router.get('/all', getAll);
 router.delete('/:id', removeUser);
 
 // Update User
-// http://localhost:5001/api/auth/:username
-router.put('/:username', updateUser);
+// http://localhost:5001/api/auth/:userId
+router.put('/:userId', updateUser);
 
 export default router;
 
