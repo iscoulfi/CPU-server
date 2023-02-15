@@ -57,4 +57,8 @@ io.on('connection', (socket) => {
       socket.to(sendUserSocket).emit('logout');
     }
   });
+
+  socket.on('refresh', (itemId) => {
+    socket.broadcast.emit('refresh-comments', itemId);
+  });
 });

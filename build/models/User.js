@@ -14,6 +14,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    statusUser: {
+        type: String,
+        default: 'available',
+    },
     roles: [{ type: String, ref: 'Role' }],
     collections: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Collection' }],
 }, { timestamps: true });

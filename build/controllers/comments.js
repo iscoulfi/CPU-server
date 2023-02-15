@@ -15,7 +15,8 @@ export const createComment = async (req, res) => {
         catch (error) {
             console.log(error);
         }
-        res.json(newComment);
+        const list = await Comment.find({ item: req.params.itemId }).sort('-createdAt');
+        res.json(list);
     }
     catch (error) {
         res.json({ message: 'Something went wrong' });
