@@ -5,7 +5,7 @@ const router = Router();
 router.post('/', checkAuth, createCollection);
 router.get('/', getAll);
 router.get('/:id', getById);
-router.get('/user/me', checkAuth, getMyCollections);
+router.get('/user/:userId', checkAuth, getMyCollections);
 router.put('/:id', checkAuth, updateCollection);
 router.delete('/:id', checkAuth, removeCollection);
 export default router;

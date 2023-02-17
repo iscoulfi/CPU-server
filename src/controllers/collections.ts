@@ -9,10 +9,10 @@ export const createCollection = async (req: Request, res: Response) => {
 
     const newCollection = new Collection({
       ...data,
-      author: req.user.id,
+      author: req.body.userId,
     });
     await newCollection.save();
-    await User.findByIdAndUpdate(req.user.id, {
+    await User.findByIdAndUpdate(req.body.userId, {
       $push: { collections: newCollection },
     });
     return res.json(newCollection);
@@ -63,20 +63,10 @@ export const getById = async (req: Request, res: Response) => {
 //Get my collections +
 export const getMyCollections = async (req: Request, res: Response) => {
   try {
-    // чекнуть как это будет работать с админом
-    // const list = await Collection.find({ author: req.user.id });
-    // res.json(list);
-    const user = await User.findById(req.user.id);
-    if (user) {
-      const list = await Promise.all(
-        user.collections.map((post) => {
-          return Collection.findById(post._id);
-        }),
-      );
-      res.json(list);
-    }
+    const list = await Collection.find({ author: req.params.userId });
+    res.json(list);
   } catch (error) {
-    res.json({ message: 'Something went wrong' });
+    res.json([]);
   }
 };
 

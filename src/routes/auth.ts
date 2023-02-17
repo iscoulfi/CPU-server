@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, getMe, getAll, removeUser, updateUser } from '../controllers/auth.js';
+import { register, login, getMe, getAll, removeUser, updateUser, getProfile } from '../controllers/auth.js';
 import { checkAuth } from '../utils/checkAuth.js';
 import { checkRole } from '../utils/checkRole.js';
 const router = Router();
@@ -16,18 +16,20 @@ router.post('/login', login);
 // http://localhost:5001/api/auth/me
 router.get('/me', checkAuth, getMe);
 
+// Get Profile
+// http://localhost:5001/api/auth/profile/:userId
+router.get('/profile/:userId', checkRole(['admin']), getProfile);
+
 // Get All
 // http://localhost:5001/api/auth/all
-router.get('/all', getAll);
+router.get('/all', checkRole(['admin']), getAll);
 
 // Remove User
 // http://localhost:5001/api/auth/:id
-router.delete('/:id', removeUser);
+router.delete('/:id', checkRole(['admin']), removeUser);
 
 // Update User
 // http://localhost:5001/api/auth/:userId
-router.put('/:userId', updateUser);
+router.put('/:userId', checkRole(['admin']), updateUser);
 
 export default router;
-
-// checkRole(['admin'])

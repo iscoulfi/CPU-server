@@ -136,6 +136,17 @@ export const getMe = async (req: Request, res: Response) => {
   }
 };
 
+export const getProfile = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    res.json({
+      user,
+    });
+  } catch (error) {
+    res.json(null);
+  }
+};
+
 // Get All
 export const getAll = async (req: Request, res: Response) => {
   try {
@@ -180,7 +191,11 @@ export const removeUser = async (req: Request, res: Response) => {
 // Update user
 export const updateUser = async (req: Request, res: Response) => {
   try {
-    await User.findByIdAndUpdate(req.params.userId, req.body);
+    if (typeof req.body.prop === 'string') {
+      await User.findByIdAndUpdate(req.params.userId, { statusUser: req.body.prop });
+    } else {
+      await User.findByIdAndUpdate(req.params.userId, { roles: req.body.prop });
+    }
     const users = await User.find();
     res.json(users);
   } catch (error) {

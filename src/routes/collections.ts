@@ -22,8 +22,8 @@ router.get('/', getAll);
 router.get('/:id', getById);
 
 // Get My Collections
-// http://localhost:5001/api/collections/user/me
-router.get('/user/me', checkAuth, getMyCollections);
+// http://localhost:5001/api/collections/user/:userId
+router.get('/user/:userId', checkAuth, getMyCollections);
 
 // http://localhost:5001/api/collections/:id
 router.put('/:id', checkAuth, updateCollection);
