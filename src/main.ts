@@ -44,7 +44,13 @@ const io = new Server(server, {
   },
 });
 
+interface IUser {
+  userId: string;
+  room: string;
+}
+
 global.onlineUsers = new Map();
+let users: IUser[] = [];
 io.on('connection', (socket) => {
   socket.on('add-user', (userId) => {
     onlineUsers.set(userId, socket.id);
@@ -58,7 +64,28 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('joinRoom', (itemId) => {
+    const user = { userId: socket.id, room: itemId };
+
+    const check = users.every((user: IUser) => user.userId !== socket.id);
+
+    if (check) {
+      users.push(user);
+      socket.join(user.room);
+    } else {
+      users.map((user: IUser) => {
+        if (user.userId === socket.id) {
+          if (user.room !== itemId) {
+            socket.leave(user.room);
+            socket.join(itemId);
+            user.room = itemId;
+          }
+        }
+      });
+    }
+  });
+
   socket.on('refresh', (itemId) => {
-    socket.broadcast.emit('refresh-comments', itemId);
+    socket.to(itemId).emit('refresh-comments', itemId);
   });
 });
