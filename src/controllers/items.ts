@@ -3,7 +3,7 @@ import Item from '../models/Item.js';
 import Comment from '../models/Comment.js';
 import Collection from '../models/Collection.js';
 
-// Create Item +
+// Create Item
 export const createItem = async (req: Request, res: Response) => {
   const data = req.body;
   data.checkbox1 = data.checkbox1 ? '+' : '-';
@@ -35,7 +35,7 @@ export interface IItem {
   createdAt: string;
 }
 
-// Get All Items +
+// Get All Items
 export const getAll = async (req: Request, res: Response) => {
   try {
     const { search } = req.query;
@@ -138,7 +138,7 @@ export const getAll = async (req: Request, res: Response) => {
   }
 };
 
-// Get Item By Id +
+// Get Item By Id
 export const getById = async (req: Request, res: Response) => {
   try {
     const item = await Item.findById(req.params.itemId);
@@ -148,7 +148,7 @@ export const getById = async (req: Request, res: Response) => {
   }
 };
 
-//Get collection Items +
+//Get collection Items
 export const getCollectionItems = async (req: Request, res: Response) => {
   try {
     const list = await Item.find({ coll: req.params.collId });
@@ -158,7 +158,7 @@ export const getCollectionItems = async (req: Request, res: Response) => {
   }
 };
 
-// Update Item +
+// Update Item
 export const updateItem = async (req: Request, res: Response) => {
   try {
     const data = req.body;
@@ -190,7 +190,7 @@ export const updateItem = async (req: Request, res: Response) => {
   }
 };
 
-// Remove Item +
+// Remove Item
 export const removeItem = async (req: Request, res: Response) => {
   try {
     const item = await Item.findByIdAndDelete(req.params.itemId);
@@ -200,19 +200,19 @@ export const removeItem = async (req: Request, res: Response) => {
       $pull: { items: req.params.itemId },
     });
 
-    res.json({ message: 'Item has been deleted' });
+    res.json(req.params.itemId);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
   }
 };
 
-// Get Last Tags +
+// Get Last Tags
 export const getLastTags = async (req: Request, res: Response) => {
   try {
     const items = await Item.find().limit(15);
 
     const tags = items.map((obj) => obj.tags).flat();
-    const filterTags = tags.filter((el, ind) => ind === tags.indexOf(el)).slice(0, 15);
+    const filterTags = tags.filter((el, ind) => ind === tags.indexOf(el)).slice(0, 20);
 
     res.json(filterTags);
   } catch (err) {
@@ -220,7 +220,7 @@ export const getLastTags = async (req: Request, res: Response) => {
   }
 };
 
-// Get Item Comments +
+// Get Item Comments
 export const getItemComments = async (req: Request, res: Response) => {
   try {
     const list = await Comment.find({ item: req.params.itemId }).sort('-createdAt');
@@ -230,7 +230,7 @@ export const getItemComments = async (req: Request, res: Response) => {
   }
 };
 
-//Like +
+//Like
 export const likePost = async (req: Request, res: Response) => {
   try {
     const { itemId } = req.params;

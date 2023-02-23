@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import Collection from '../models/Collection.js';
 import User from '../models/User.js';
 
-// Create Collection +
+// Create Collection
 export const createCollection = async (req: Request, res: Response) => {
   try {
     const data = req.body;
@@ -21,7 +21,7 @@ export const createCollection = async (req: Request, res: Response) => {
   }
 };
 
-// Get All Collections +
+// Get All Collections
 export const getAll = async (req: Request, res: Response) => {
   try {
     const collections = await Collection.aggregate([
@@ -50,7 +50,7 @@ export const getAll = async (req: Request, res: Response) => {
   }
 };
 
-// Get Collection By Id +
+// Get Collection By Id
 export const getById = async (req: Request, res: Response) => {
   try {
     const collection = await Collection.findById(req.params.id);
@@ -60,7 +60,7 @@ export const getById = async (req: Request, res: Response) => {
   }
 };
 
-//Get my collections +
+//Get my collections
 export const getMyCollections = async (req: Request, res: Response) => {
   try {
     const list = await Collection.find({ author: req.params.userId });
@@ -70,7 +70,7 @@ export const getMyCollections = async (req: Request, res: Response) => {
   }
 };
 
-// Update Collection +
+// Update Collection
 export const updateCollection = async (req: Request, res: Response) => {
   try {
     const { title, text, imgUrl, adFields } = req.body;
@@ -89,7 +89,7 @@ export const updateCollection = async (req: Request, res: Response) => {
   }
 };
 
-// Remove Collection +
+// Remove Collection
 export const removeCollection = async (req: Request, res: Response) => {
   try {
     const collection = await Collection.findByIdAndDelete(req.params.id);
@@ -99,7 +99,7 @@ export const removeCollection = async (req: Request, res: Response) => {
       $pull: { collections: req.params.id },
     });
 
-    res.json({ message: 'Collection has been deleted' });
+    res.json(req.params.id);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
   }
