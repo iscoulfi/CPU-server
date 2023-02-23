@@ -86,7 +86,7 @@ export const removeCollection = async (req, res) => {
         await User.findByIdAndUpdate(req.user.id, {
             $pull: { collections: req.params.id },
         });
-        res.json({ message: 'Collection has been deleted' });
+        res.json(collection);
     }
     catch (error) {
         res.json({ message: 'Something went wrong' });

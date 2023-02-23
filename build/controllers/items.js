@@ -175,7 +175,7 @@ export const removeItem = async (req, res) => {
         await Collection.findByIdAndUpdate(req.params.collId, {
             $pull: { items: req.params.itemId },
         });
-        res.json({ message: 'Item has been deleted' });
+        res.json(item.coll);
     }
     catch (error) {
         res.json({ message: 'Something went wrong' });
@@ -185,7 +185,7 @@ export const getLastTags = async (req, res) => {
     try {
         const items = await Item.find().limit(15);
         const tags = items.map((obj) => obj.tags).flat();
-        const filterTags = tags.filter((el, ind) => ind === tags.indexOf(el)).slice(0, 15);
+        const filterTags = tags.filter((el, ind) => ind === tags.indexOf(el)).slice(0, 20);
         res.json(filterTags);
     }
     catch (err) {
