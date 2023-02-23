@@ -200,7 +200,7 @@ export const removeItem = async (req: Request, res: Response) => {
       $pull: { items: req.params.itemId },
     });
 
-    res.json(req.params.itemId);
+    res.json(item.coll);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
   }

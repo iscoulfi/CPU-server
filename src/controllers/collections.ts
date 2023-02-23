@@ -99,7 +99,7 @@ export const removeCollection = async (req: Request, res: Response) => {
       $pull: { collections: req.params.id },
     });
 
-    res.json(req.params.id);
+    res.json(collection);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
   }

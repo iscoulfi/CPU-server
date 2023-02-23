@@ -64,6 +64,14 @@ io.on('connection', (socket) => {
     }
   });
 
+  socket.on('change-role', (userId) => {
+    const sendUserSocket = onlineUsers.get(userId);
+
+    if (sendUserSocket) {
+      socket.to(sendUserSocket).emit('refresh-role');
+    }
+  });
+
   socket.on('joinRoom', (itemId) => {
     const user = { userId: socket.id, room: itemId };
 
