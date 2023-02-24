@@ -175,7 +175,21 @@ export const removeItem = async (req, res) => {
         await Collection.findByIdAndUpdate(req.params.collId, {
             $pull: { items: req.params.itemId },
         });
+        await Comment.deleteMany({ item: req.params.itemId });
         res.json(item.coll);
+    }
+    catch (error) {
+        res.json({ message: 'Something went wrong' });
+    }
+};
+export const removeAllItems = async (req, res) => {
+    try {
+        const items = await Item.find({ coll: req.params.collId });
+        await Item.deleteMany({ coll: req.params.collId });
+        for (let i of items) {
+            await Comment.deleteMany({ item: i._id });
+        }
+        res.json({ message: 'Deleted' });
     }
     catch (error) {
         res.json({ message: 'Something went wrong' });

@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import Collection from '../models/Collection.js';
+import Comment from '../models/Comment.js';
+import Item from '../models/Item.js';
 import User from '../models/User.js';
 
 // Create Collection
@@ -100,6 +102,25 @@ export const removeCollection = async (req: Request, res: Response) => {
     });
 
     res.json(collection);
+  } catch (error) {
+    res.json({ message: 'Something went wrong' });
+  }
+};
+
+// Remove All Collections
+export const removeAllCollections = async (req: Request, res: Response) => {
+  try {
+    const collections = await Collection.find({ author: req.params.id });
+    await Collection.deleteMany({ author: req.params.id });
+    for (let c of collections) {
+      const items = await Item.find({ coll: c._id });
+      await Item.deleteMany({ coll: c._id });
+      for (let i of items) {
+        await Comment.deleteMany({ item: i._id });
+      }
+    }
+
+    res.json({ message: 'Deleted' });
   } catch (error) {
     res.json({ message: 'Something went wrong' });
   }

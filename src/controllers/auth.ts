@@ -164,25 +164,12 @@ export const getAll = async (req: Request, res: Response) => {
 
 export const removeUser = async (req: Request, res: Response) => {
   try {
-    const collections = new Array();
-    const itemsId = new Array();
-    const user = await User.findByIdAndDelete(req.params.id);
+    await User.findByIdAndDelete(req.params.id);
+    const urls = new Array();
+    const collections = await Collection.find({ author: req.params.id });
+    collections.forEach((coll) => urls.push(coll.imgUrl));
 
-    if (user) {
-      const collectionsId = user.collections.map((el) => el.toString());
-      for (let collId of collectionsId) {
-        collections.push(await Collection.findById(collId));
-        await Collection.findByIdAndDelete(collId);
-      }
-    }
-
-    collections.forEach((coll) => coll.items.forEach((item: Types.ObjectId) => itemsId.push(item.toString())));
-
-    for (let id of itemsId) {
-      await Item.findByIdAndDelete(id);
-    }
-
-    res.json({ id: req.params.id });
+    res.json(urls);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
   }

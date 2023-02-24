@@ -6,6 +6,7 @@ import {
   removeCollection,
   createCollection,
   updateCollection,
+  removeAllCollections,
 } from '../controllers/collections.js';
 import { checkAuth } from '../utils/checkAuth.js';
 const router = Router();
@@ -29,7 +30,11 @@ router.get('/user/:userId', checkAuth, getMyCollections);
 router.put('/:id', checkAuth, updateCollection);
 
 // Remove Collection
-// http://localhost:5001/api/collections/:id
-router.delete('/:id', checkAuth, removeCollection);
+// http://localhost:5001/api/collections/delete/:id
+router.delete('/delete/:id', checkAuth, removeCollection);
+
+// Remove All Collections
+// http://localhost:5001/api/collections/remove/:id
+router.delete('/remove/:id', checkAuth, removeAllCollections);
 
 export default router;

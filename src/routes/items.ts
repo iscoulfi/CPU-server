@@ -9,6 +9,7 @@ import {
   getLastTags,
   getItemComments,
   likePost,
+  removeAllItems,
 } from '../controllers/items.js';
 import { checkAuth } from '../utils/checkAuth.js';
 const router = Router();
@@ -34,8 +35,12 @@ router.get('/coll/:collId', getCollectionItems);
 router.put('/:itemId', checkAuth, updateItem);
 
 // Remove Item
-// http://localhost:5001/api/items/:collId/:itemId
-router.delete('/:collId/:itemId', checkAuth, removeItem);
+// http://localhost:5001/api/items/delete/:collId/:itemId
+router.delete('/delete/:collId/:itemId', checkAuth, removeItem);
+
+// Remove All Items
+// http://localhost:5001/api/items/remove/:collId
+router.delete('/remove/:collId', checkAuth, removeAllItems);
 
 // Get Last Tags
 // http://localhost:5001/api/items/tags/last
