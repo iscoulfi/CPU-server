@@ -2,10 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import Role from '../models/Role.js';
 import Collection from '../models/Collection.js';
-import { Types } from 'mongoose';
-import Item from '../models/Item.js';
 
 // Register user
 export const register = async (req: Request, res: Response) => {
@@ -29,18 +26,11 @@ export const register = async (req: Request, res: Response) => {
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
 
-    const userRole = await Role.findOne({ value: 'user' });
     const newUser = new User({
       username,
       email,
       password: hash,
-      roles: [
-        (
-          userRole as {
-            value: string;
-          }
-        ).value,
-      ],
+      roles: ['user'],
     });
 
     const token = jwt.sign(
@@ -109,6 +99,7 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+// Get Me
 export const getMe = async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.user.id);
@@ -136,6 +127,7 @@ export const getMe = async (req: Request, res: Response) => {
   }
 };
 
+// Get Profile
 export const getProfile = async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.params.userId);
@@ -161,12 +153,12 @@ export const getAll = async (req: Request, res: Response) => {
 };
 
 // Remove user
-
 export const removeUser = async (req: Request, res: Response) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     const urls = new Array();
     const collections = await Collection.find({ author: req.params.id });
+
     collections.forEach((coll) => urls.push(coll.imgUrl));
 
     res.json(urls);

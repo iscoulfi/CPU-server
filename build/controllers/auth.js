@@ -1,7 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import Role from '../models/Role.js';
 import Collection from '../models/Collection.js';
 export const register = async (req, res) => {
     try {
@@ -20,14 +19,11 @@ export const register = async (req, res) => {
         }
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(password, salt);
-        const userRole = await Role.findOne({ value: 'user' });
         const newUser = new User({
             username,
             email,
             password: hash,
-            roles: [
-                userRole.value,
-            ],
+            roles: ['user'],
         });
         const token = jwt.sign({
             id: newUser._id,

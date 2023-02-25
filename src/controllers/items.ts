@@ -3,13 +3,26 @@ import Item from '../models/Item.js';
 import Comment from '../models/Comment.js';
 import Collection from '../models/Collection.js';
 
+export interface IItem {
+  _id: string;
+  title: string;
+  coll: string;
+  createdAt: string;
+}
+
 // Create Item
 export const createItem = async (req: Request, res: Response) => {
   const data = req.body;
   data.checkbox1 = data.checkbox1 ? '+' : '-';
   data.checkbox2 = data.checkbox2 ? '+' : '-';
   data.checkbox3 = data.checkbox3 ? '+' : '-';
+
   try {
+    const collection = await Collection.findById(req.params.collId);
+    if (collection && collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+      return res.json({ message: 'No access' });
+    }
+
     const newItem = new Item({
       ...data,
       tags: req.body.tags.split(' '),
@@ -28,14 +41,7 @@ export const createItem = async (req: Request, res: Response) => {
   }
 };
 
-export interface IItem {
-  _id: string;
-  title: string;
-  coll: string;
-  createdAt: string;
-}
-
-// Get All Items
+// Search Items
 export const getAll = async (req: Request, res: Response) => {
   try {
     const { search } = req.query;
@@ -53,6 +59,7 @@ export const getAll = async (req: Request, res: Response) => {
     let items;
     let coll;
     let comments;
+
     if (search) {
       items = await Item.aggregate([
         {
@@ -64,6 +71,7 @@ export const getAll = async (req: Request, res: Response) => {
           },
         },
       ]);
+
       coll = await Collection.aggregate([
         {
           $search: {
@@ -90,12 +98,14 @@ export const getAll = async (req: Request, res: Response) => {
           $project: { items: 1 },
         },
       ]);
+
       for (const c of coll) {
         for (const i of c.items) {
           const a = await Item.findById(i.toString());
           items.push(a);
         }
       }
+
       comments = await Comment.aggregate([
         {
           $search: {
@@ -148,7 +158,7 @@ export const getById = async (req: Request, res: Response) => {
   }
 };
 
-//Get collection Items
+// Get Collection Items
 export const getCollectionItems = async (req: Request, res: Response) => {
   try {
     const list = await Item.find({ coll: req.params.collId });
@@ -163,6 +173,12 @@ export const updateItem = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const item = await Item.findById(req.params.itemId);
+    const collection = await Collection.findById(item?.coll.toString());
+
+    if (collection && collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+      return res.json({ message: 'No access' });
+    }
+
     if (item) {
       item.title = data.title;
       item.tags = data.tags.split(' ');
@@ -184,6 +200,7 @@ export const updateItem = async (req: Request, res: Response) => {
 
       await item.save();
     }
+
     res.json(item);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
@@ -192,6 +209,11 @@ export const updateItem = async (req: Request, res: Response) => {
 
 // Remove Item
 export const removeItem = async (req: Request, res: Response) => {
+  const collection = await Collection.findById(req.params.collId);
+  if (collection && collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+    return res.json({ message: 'No access' });
+  }
+
   try {
     const item = await Item.findByIdAndDelete(req.params.itemId);
     if (!item) return res.json({ message: "This Item doesn't exist" });
@@ -210,9 +232,15 @@ export const removeItem = async (req: Request, res: Response) => {
 
 // Remove All Items
 export const removeAllItems = async (req: Request, res: Response) => {
+  const collection = await Collection.findById(req.params.collId);
+  if (collection && collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+    return res.json({ message: 'No access' });
+  }
+
   try {
     const items = await Item.find({ coll: req.params.collId });
     await Item.deleteMany({ coll: req.params.collId });
+
     for (let i of items) {
       await Comment.deleteMany({ item: i._id });
     }
@@ -247,18 +275,21 @@ export const getItemComments = async (req: Request, res: Response) => {
   }
 };
 
-//Like
+// Set Like
 export const likePost = async (req: Request, res: Response) => {
   try {
     const { itemId } = req.params;
     const item = await Item.findById(itemId);
+
     if (item) {
       const isLiked = item.likes.get(req.user.id);
+
       if (isLiked) {
         item.likes.delete(req.user.id);
       } else {
         item.likes.set(req.user.id, true);
       }
+
       const updatedItem = await Item.findByIdAndUpdate(itemId, { likes: item.likes }, { new: true });
       res.json(updatedItem);
     }

@@ -1,22 +1,25 @@
 import { Request, Response } from 'express';
 import Comment from '../models/Comment.js';
 import Item from '../models/Item.js';
+import User from '../models/User.js';
 
 export const createComment = async (req: Request, res: Response) => {
   try {
-    const { comment, author } = req.body;
+    const { comment } = req.body;
     if (!comment) return;
+    const person = await User.findById(req.user.id);
+    const newComment = new Comment({
+      comment,
+      authorId: req.user.id,
+      author: person?.username,
+      item: req.params.itemId,
+    });
 
-    const newComment = new Comment({ comment, authorId: req.user.id, author, item: req.params.itemId });
     await newComment.save();
+    await Item.findByIdAndUpdate(req.params.itemId, {
+      $push: { comments: newComment._id },
+    });
 
-    try {
-      await Item.findByIdAndUpdate(req.params.itemId, {
-        $push: { comments: newComment._id },
-      });
-    } catch (error) {
-      console.log(error);
-    }
     const list = await Comment.find({ item: req.params.itemId }).sort('-createdAt');
 
     res.json(list);

@@ -3,6 +3,9 @@ import Comment from '../models/Comment.js';
 import Item from '../models/Item.js';
 import User from '../models/User.js';
 export const createCollection = async (req, res) => {
+    if (req.body.userId !== req.user.id && req.user.roles[0] !== 'admin') {
+        return res.json({ message: 'No access' });
+    }
     try {
         const data = req.body;
         const newCollection = new Collection({
@@ -67,6 +70,9 @@ export const updateCollection = async (req, res) => {
     try {
         const { title, text, imgUrl, adFields } = req.body;
         const collection = await Collection.findById(req.params.id);
+        if (collection && collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+            return res.json({ message: 'No access' });
+        }
         if (collection) {
             collection.title = title;
             collection.text = text;
@@ -82,9 +88,13 @@ export const updateCollection = async (req, res) => {
 };
 export const removeCollection = async (req, res) => {
     try {
-        const collection = await Collection.findByIdAndDelete(req.params.id);
+        const collection = await Collection.findById(req.params.id);
         if (!collection)
             return res.json({ message: "This collection doesn't exist" });
+        if (collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+            return res.json({ message: 'No access' });
+        }
+        await Collection.findByIdAndDelete(req.params.id);
         await User.findByIdAndUpdate(req.user.id, {
             $pull: { collections: req.params.id },
         });
@@ -95,6 +105,9 @@ export const removeCollection = async (req, res) => {
     }
 };
 export const removeAllCollections = async (req, res) => {
+    if (req.params.id !== req.user.id && req.user.roles[0] !== 'admin') {
+        return res.json({ message: 'No access' });
+    }
     try {
         const collections = await Collection.find({ author: req.params.id });
         await Collection.deleteMany({ author: req.params.id });

@@ -15,11 +15,9 @@ dotenv.config();
 const DB_URL = process.env.DB_URL;
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-//Routes
 app.use('/api/auth', authRoute);
 app.use('/api/collections', collectRoute);
 app.use('/api/items', itemRoute);

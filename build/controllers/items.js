@@ -7,6 +7,10 @@ export const createItem = async (req, res) => {
     data.checkbox2 = data.checkbox2 ? '+' : '-';
     data.checkbox3 = data.checkbox3 ? '+' : '-';
     try {
+        const collection = await Collection.findById(req.params.collId);
+        if (collection && collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+            return res.json({ message: 'No access' });
+        }
         const newItem = new Item({
             ...data,
             tags: req.body.tags.split(' '),
@@ -141,6 +145,10 @@ export const updateItem = async (req, res) => {
     try {
         const data = req.body;
         const item = await Item.findById(req.params.itemId);
+        const collection = await Collection.findById(item === null || item === void 0 ? void 0 : item.coll.toString());
+        if (collection && collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+            return res.json({ message: 'No access' });
+        }
         if (item) {
             item.title = data.title;
             item.tags = data.tags.split(' ');
@@ -168,6 +176,10 @@ export const updateItem = async (req, res) => {
     }
 };
 export const removeItem = async (req, res) => {
+    const collection = await Collection.findById(req.params.collId);
+    if (collection && collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+        return res.json({ message: 'No access' });
+    }
     try {
         const item = await Item.findByIdAndDelete(req.params.itemId);
         if (!item)
@@ -183,6 +195,10 @@ export const removeItem = async (req, res) => {
     }
 };
 export const removeAllItems = async (req, res) => {
+    const collection = await Collection.findById(req.params.collId);
+    if (collection && collection.author.toString() !== req.user.id && req.user.roles[0] !== 'admin') {
+        return res.json({ message: 'No access' });
+    }
     try {
         const items = await Item.find({ coll: req.params.collId });
         await Item.deleteMany({ coll: req.params.collId });
