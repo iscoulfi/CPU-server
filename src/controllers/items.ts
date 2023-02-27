@@ -224,7 +224,7 @@ export const removeItem = async (req: Request, res: Response) => {
 
     await Comment.deleteMany({ item: req.params.itemId });
 
-    res.json(item.coll);
+    res.json(req.params.itemId);
   } catch (error) {
     res.json({ message: 'Something went wrong' });
   }
